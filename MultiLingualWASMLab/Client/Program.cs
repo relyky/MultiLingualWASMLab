@@ -17,4 +17,9 @@ builder.Services
     .AddRefitClient<IWeatherForecastApi>()
     .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
+//## 註冊 RefitClient API。 --- 手動一個一個註冊
+builder.Services
+    .AddRefitClient<IOrderApi>()
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+
 await builder.Build().RunAsync();

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiLingualWASMLab.Server", "MultiLingualWASMLab\Server\MultiLingualWASMLab.Server.csproj", "{1792D073-3EE3-4610-96A9-2873B4806318}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiLingualWASMLab.Server", "MultiLingualWASMLab\Server\MultiLingualWASMLab.Server.csproj", "{1792D073-3EE3-4610-96A9-2873B4806318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiLingualWASMLab.Client", "MultiLingualWASMLab\Client\MultiLingualWASMLab.Client.csproj", "{ED723BB9-E7F3-4CEA-825B-D71A94C9835C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiLingualWASMLab.Client", "MultiLingualWASMLab\Client\MultiLingualWASMLab.Client.csproj", "{ED723BB9-E7F3-4CEA-825B-D71A94C9835C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiLingualWASMLab.Shared", "MultiLingualWASMLab\Shared\MultiLingualWASMLab.Shared.csproj", "{6211841A-AB5D-410D-8304-8377A732F69B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiLingualWASMLab.Shared", "MultiLingualWASMLab\Shared\MultiLingualWASMLab.Shared.csproj", "{6211841A-AB5D-410D-8304-8377A732F69B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

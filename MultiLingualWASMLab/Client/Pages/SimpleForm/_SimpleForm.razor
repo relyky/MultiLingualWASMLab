@@ -1,0 +1,116 @@
+﻿@page "/simpleform"
+@inject ISnackbar snackSvc
+@inject IOrderApi bizApi
+@inject IDialogService dlgSvc
+
+<PageTitle>Simple Form</PageTitle>
+
+<CustomOverlay Visible=f_loading />
+<MudContainer>
+  <MudText Typo=Typo.h3>Simple Form</MudText>
+
+  <MudCard>
+    <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@(orderValidator.Validation) ValidationDelay=0>
+      <MudCardContent>
+        <MudTextField @bind-Value="formData.Name"
+                      For="@(() => formData.Name)"
+                      Immediate="true"
+                      Label="Name" />
+
+        <MudTextField @bind-Value="formData.Email"
+                      For="@(() => formData.Email)"
+                      Immediate="true"
+                      Label="Email" />
+
+        <MudTextField @bind-Value="formData.CCNumber"
+                      For="@(() => formData.CCNumber)"
+                      Immediate="true"
+                      Label="Credit card nr" />
+
+        <MudTextField @bind-Value="formData.Address.Address"
+                      For="@(() => formData.Address.Address)"
+                      Immediate="true"
+                      Label="Address" />
+
+        <MudTextField @bind-Value="formData.Address.City"
+                      For="@(() => formData.Address.City)"
+                      Immediate="true"
+                      Label="City" />
+
+        <MudTextField @bind-Value="formData.Address.Country"
+                      For="@(() => formData.Address.Country)"
+                      Immediate="true"
+                      Label="Country" />
+      </MudCardContent>
+      <MudCardContent Class="pa-0">
+
+        <MudTable Items=@formData.OrderDetails Hover="true" Breakpoint=Breakpoint.None Dense=true Elevation=0>
+          <HeaderContent>
+            <MudTh>Description</MudTh>
+            <MudTh>Offer</MudTh>
+          </HeaderContent>
+          <RowTemplate>
+            <MudTd DataLabel="Description">
+              <MudForm Model="@context" Validation=@(orderDetailsValidator.Validation)>
+                <MudTextField Label="Enter Description"
+                @bind-Value="context.Description"
+                              For="(() => context.Description)" />
+              </MudForm>
+            </MudTd>
+            <MudTd DataLabel="Offer">
+              <MudForm Model="@context">
+                <MudNumericField Label="Enter Offer"
+                @bind-Value="context.Offer"
+                                 Validation=@(orderDetailsValidator.Validation)
+                                 For="(() => context.Offer)" />
+              </MudForm>
+            </MudTd>
+          </RowTemplate>
+        </MudTable>
+
+      </MudCardContent>
+    </MudForm>
+    <MudCardActions>
+      <MudButton ButtonType=ButtonType.Submit Variant=Variant.Filled Color=Color.Primary Class="ml-auto" Disabled=@(!f_isValid) OnClick=HandleSubmit>Order</MudButton>
+    </MudCardActions>
+  </MudCard>
+
+</MudContainer>
+
+@code {
+  //## Resource
+  MudForm refForm;
+  OrderValidator orderValidator = new();
+  OrderDetailsValidator orderDetailsValidator = new();
+
+  //## State
+  OrderModel formData = new OrderModel();
+  bool f_loading = false;
+  bool f_isValid = false;
+
+  async Task HandleSubmit()
+  {
+    try
+    {
+      f_loading = true;
+      await refForm.Validate();
+      if (!refForm.IsValid) return;
+
+      formData = await bizApi.SaveOrder(formData);
+      snackSvc.Add("Submited!", MudBlazor.Severity.Success);
+    }
+    catch (Refit.ApiException ex)
+    {
+      dlgSvc.ShowMessageBox("錯誤訊息", ex.Content).AndForget();
+    }
+    catch (Exception ex)
+    {
+      string errMsg = "EXCEPTION: " + ex.Message;
+      dlgSvc.ShowMessageBox("出現例外！", errMsg).AndForget();
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+}
