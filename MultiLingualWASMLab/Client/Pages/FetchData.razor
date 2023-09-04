@@ -1,15 +1,17 @@
 ﻿@page "/fetchdata"
-@using MultiLingualWASMLab.Shared
 @inject HttpClient Http
+@inject IWeatherForecastApi bizApi
 
 <PageTitle>Weather forecast</PageTitle>
 
 <MudContainer>
-  <h1>Weather forecast</h1>
+  <MudText Typo=Typo.h3>Weather forecast</MudText>
+  <MudText>This component demonstrates fetching data from the server.</MudText>
+  <MudToolBar>
+    <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=HandleQuery>刷新</MudButton>
+  </MudToolBar>
 
-  <p>This component demonstrates fetching data from the server.</p>
-
-  @if (forecasts == null)
+  @if (forecastList == null)
   {
     <p><em>Loading...</em></p>
   }
@@ -25,7 +27,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach (var forecast in forecasts)
+        @foreach (var forecast in forecastList)
         {
           <tr>
             <td>@forecast.Date.ToShortDateString()</td>
@@ -40,10 +42,15 @@
 </MudContainer>
 
 @code {
-  private WeatherForecast[]? forecasts;
+  private List<WeatherForecast>? forecastList;
 
   protected override async Task OnInitializedAsync()
   {
-    forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+    await HandleQuery();
+  }
+
+  async Task HandleQuery()
+  {
+    forecastList = await bizApi.WeatherForecastAsync();
   }
 }
