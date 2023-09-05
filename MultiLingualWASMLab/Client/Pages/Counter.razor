@@ -1,6 +1,6 @@
 ﻿@page "/counter"
 @inject ILogger<Counter> logger
-@inject IStringLocalizer<App> loc
+@inject IStringLocalizer<Counter> loc
 
 <PageTitle>Counter</PageTitle>
 
@@ -8,6 +8,14 @@
   <MudText Typo=Typo.h3>Counter</MudText>
   <MudText>Current count: @currentCount</MudText>
   <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=IncrementCount>@loc["Click me"]</MudButton>
+
+  <MudAlert Severity=Severity.Normal>
+    <span style="font-size:2em">@( $"click {currentCount} times")</span> 
+  </MudAlert>
+
+  <MudAlert Severity=Severity.Info>
+    <span style="font-size:2em">@String.Format(loc["click {0} times"], currentCount)</span>
+  </MudAlert>
 
 </MudContainer>
 

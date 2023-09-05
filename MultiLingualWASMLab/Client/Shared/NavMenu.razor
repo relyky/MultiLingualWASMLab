@@ -1,6 +1,8 @@
-﻿<MudNavMenu>
-  <MudNavLink Href="/" Match=NavLinkMatch.All>Home</MudNavLink>
-  <MudNavLink Href="/counter">Counter</MudNavLink>
-  <MudNavLink Href="/fetchdata">Fetch data</MudNavLink>
-  <MudNavLink Href="/simpleform">Simple Form</MudNavLink>
+﻿@inject IStringLocalizer<NavMenu> loc
+
+<MudNavMenu>
+  <MudNavLink Href="/" Match=NavLinkMatch.All>@loc["Home"]</MudNavLink>
+  <MudNavLink Href="/counter">@loc["Counter"]</MudNavLink>
+  <MudNavLink Href="/fetchdata">@loc["Fetch data"]</MudNavLink>
+  <MudNavLink Href="/simpleform">@loc["Simple Form"]</MudNavLink>
 </MudNavMenu>
