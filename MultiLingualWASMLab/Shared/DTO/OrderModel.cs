@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using MultiLingualWASMLab.Shared;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,10 +11,24 @@ namespace MultiLingualWASMLab.DTO;
 
 public class OrderModel
 {
+  [PropertyName("名稱", "zh-TW")]
+  [PropertyName("Name", "en-US")]
   public string Name { get; set; } = "郝聰明";
+
+  [PropertyName("電子郵件", "zh-TW")]
+  [PropertyName("Email", "en-US")]
   public string Email { get; set; } = "smart@mail.server";
+
+  [PropertyName("信用卡號", "zh-TW")]
+  [PropertyName("Credit card No", "en-US")]
   public string CCNumber { get; set; } = "4012 8888 8888 1881";
+
+  [PropertyName("地址", "zh-TW")]
+  [PropertyName("Address", "en-US")]
   public AddressModel Address { get; set; } = new AddressModel();
+
+  [PropertyName("訂單明細", "zh-TW")]
+  [PropertyName("Order details", "en-US")]
   public List<OrderDetailsModel> OrderDetails = new List<OrderDetailsModel>()
     {
       new OrderDetailsModel()
@@ -30,28 +46,53 @@ public class OrderModel
 
 public class AddressModel
 {
+  [PropertyName("地址", "zh-TW")]
+  [PropertyName("Address", "en-US")]
   public string Address { get; set; } = "中和區中正路７５５號";
+
+  [PropertyName("城市", "zh-TW")]
+  [PropertyName("City", "en-US")]
   public string City { get; set; } = "新北市";
+
+  [PropertyName("國家", "zh-TW")]
+  [PropertyName("Country", "en-US")]
   public string Country { get; set; } = "中華民國";
 }
 
 public class OrderDetailsModel
 {
-  public string Description { get; set; }
+
+  [PropertyName("下訂說明", "zh-TW")]
+  [PropertyName("Description", "en-US")]
+  public string Description { get; set; } = default!;
+
+  [PropertyName("下訂數量", "zh-TW")]
+  [PropertyName("Offer", "en-US")]
   public decimal Offer { get; set; }
 }
 
 /// <summary>
 /// A standard AbstractValidator which contains multiple rules and can be shared with the back end API
 /// </summary>
-/// <typeparam name="OrderModel"></typeparam>
+/// <remarks>
+/// 參考：[FluentValidation - Overriding the Message](https://docs.fluentvalidation.net/en/latest/configuring.html#overriding-the-message)
+/// </remarks>
 public class OrderValidator : AbstractValidator<OrderModel>
 {
   public OrderValidator()
   {
+    var culture = CultureInfo.CurrentUICulture;
+    bool zhTW = culture.Name == "zh-TW";
+    bool enUS = culture.Name == "en-US";
+
     RuleFor(x => x.Name)
-        .NotEmpty()
-        .Length(1, 100);
+        .NotEmpty().WithMessage(zhTW ? "{PropertyName} 不可空白哦～" : "{PropertyName} no empty ～。")
+        .Length(1, 3).WithMessage(zhTW ? "{PropertyName} 長度不合３～" : "{PropertyName} length invalid ～。")
+        .WithName(x => zhTW ? "客製化名稱" : "Customized Name");
+
+    //RuleFor(x => x.Name)
+    //    .NotEmpty()
+    //    .Length(1, 20);
 
     RuleFor(x => x.Email)
         .Cascade(CascadeMode.Stop)

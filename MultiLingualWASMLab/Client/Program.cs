@@ -5,6 +5,10 @@ using MultiLingualWASMLab.Client.RefitClient;
 using MudBlazor.Services;
 using Refit;
 using Blazored.LocalStorage;
+using System.Globalization;
+
+//## ¦h°ê»y¨t - FluentValidation
+FluentValidation.ValidatorOptions.Global.DisplayNameResolver = (type, member, expression) => GT.ResolveDisplayName(member);
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

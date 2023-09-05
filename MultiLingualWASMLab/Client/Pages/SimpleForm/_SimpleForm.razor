@@ -2,6 +2,7 @@
 @inject ISnackbar snackSvc
 @inject IOrderApi bizApi
 @inject IDialogService dlgSvc
+@inject IStringLocalizer<_SimpleForm> loc
 
 <PageTitle>Simple Form</PageTitle>
 
@@ -10,59 +11,58 @@
   <MudText Typo=Typo.h3>Simple Form</MudText>
 
   <MudCard>
-    <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@(orderValidator.Validation) ValidationDelay=0>
+    <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@orderValidator.Validation ValidationDelay=0>
       <MudCardContent>
-        <MudTextField @bind-Value="formData.Name"
-                      For="@(() => formData.Name)"
-                      Immediate="true"
-                      Label="Name" />
+        <MudTextField @bind-Value=@formData.Name
+                      For="()=> formData.Name"
+                      Immediate=false
+                      Label=@(GT.Display(()=> formData.Name)) />
 
-        <MudTextField @bind-Value="formData.Email"
-                      For="@(() => formData.Email)"
-                      Immediate="true"
-                      Label="Email" />
+        <MudTextField @bind-Value=@formData.Email
+                      For="()=> formData.Email"
+                      Immediate=true
+                      Label=@(GT.Display(()=> formData.Email)) />
 
-        <MudTextField @bind-Value="formData.CCNumber"
-                      For="@(() => formData.CCNumber)"
-                      Immediate="true"
-                      Label="Credit card nr" />
+        <MudTextField @bind-Value=@formData.CCNumber
+                      For="()=> formData.CCNumber"
+                      Immediate=true
+                      Label=@(GT.Display(()=> formData.CCNumber)) />
 
-        <MudTextField @bind-Value="formData.Address.Address"
-                      For="@(() => formData.Address.Address)"
-                      Immediate="true"
-                      Label="Address" />
+        <MudTextField @bind-Value=@formData.Address.Address
+                      For="() => formData.Address.Address"
+                      Immediate=true
+                      Label=@(GT.Display(()=> formData.Address.Address)) />
 
-        <MudTextField @bind-Value="formData.Address.City"
-                      For="@(() => formData.Address.City)"
-                      Immediate="true"
-                      Label="City" />
+        <MudTextField @bind-Value=@formData.Address.City
+                      For="()=> formData.Address.City"
+                      Immediate=true
+                      Label=@(GT.Display(()=> formData.Address.City)) />
 
-        <MudTextField @bind-Value="formData.Address.Country"
-                      For="@(() => formData.Address.Country)"
-                      Immediate="true"
-                      Label="Country" />
+        <MudTextField @bind-Value=@formData.Address.Country
+                      For="()=> formData.Address.Country"
+                      Immediate=true
+                      Label=@(GT.Display(()=> formData.Address.Country)) />
       </MudCardContent>
       <MudCardContent Class="pa-0">
 
         <MudTable Items=@formData.OrderDetails Hover="true" Breakpoint=Breakpoint.None Dense=true Elevation=0>
           <HeaderContent>
-            <MudTh>Description</MudTh>
-            <MudTh>Offer</MudTh>
+            <MudTh>@loc["Description"]</MudTh>
+            <MudTh>@loc["Offer"]</MudTh>
           </HeaderContent>
           <RowTemplate>
-            <MudTd DataLabel="Description">
-              <MudForm Model="@context" Validation=@(orderDetailsValidator.Validation)>
-                <MudTextField Label="Enter Description"
-                @bind-Value="context.Description"
-                              For="(() => context.Description)" />
+            <MudTd DataLabel=@loc["Description"]>
+              <MudForm Model=@context Validation=@orderDetailsValidator.Validation>
+                <MudTextField @bind-Value=@context.Description
+                              For="() => context.Description"
+                              Label=@(GT.Display(()=> context.Description)) />
               </MudForm>
             </MudTd>
-            <MudTd DataLabel="Offer">
-              <MudForm Model="@context">
-                <MudNumericField Label="Enter Offer"
-                @bind-Value="context.Offer"
-                                 Validation=@(orderDetailsValidator.Validation)
-                                 For="(() => context.Offer)" />
+            <MudTd DataLabel=@loc["Offer"]>
+              <MudForm Model=@context Validation=@orderDetailsValidator.Validation>
+                <MudNumericField @bind-Value=@context.Offer
+                                 For="() => context.Offer"
+                                 Label=@(GT.Display(()=> context.Offer)) />
               </MudForm>
             </MudTd>
           </RowTemplate>
