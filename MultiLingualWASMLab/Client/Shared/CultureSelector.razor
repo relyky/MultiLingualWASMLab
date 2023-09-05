@@ -1,0 +1,38 @@
+﻿@inject NavigationManager navSvc
+@inject ILocalStorageService localStorage
+@inject IStringLocalizer<App> loc
+
+<span>
+  @loc["Language"]:&nbsp;
+  <select @onchange=HandleCultureChange>
+    @foreach (var culture in LocalizerSettings.SupportedCulturesWithName)
+    {
+      @if (culture.Equals(selectedCulture))
+      {
+        <option selected value="@culture.Culture">@culture.Name</option>
+      }
+      else
+      {
+        <option value="@culture.Culture">@culture.Name</option>
+      }
+    }
+  </select>
+</span>
+
+@code {
+  CultureWithName? selectedCulture = null;
+  protected override async Task OnInitializedAsync()
+  {
+    string culture = await localStorage.GetItemAsync<string>("culture");
+    selectedCulture = String.IsNullOrEmpty(culture)
+        ? LocalizerSettings.NeutralCulture
+        : LocalizerSettings.SupportedCulturesWithName.FirstOrDefault(c => c.Culture == culture);
+  }
+
+  async Task HandleCultureChange(ChangeEventArgs args)
+  {
+    string cultureString = args.Value?.ToString()!;
+    await localStorage.SetItemAsync<string>("culture", cultureString);
+    navSvc.NavigateTo(navSvc.Uri, true); // refresh current page.
+  }
+}

@@ -1,12 +1,13 @@
 ﻿@page "/counter"
 @inject ILogger<Counter> logger
+@inject IStringLocalizer<App> loc
 
 <PageTitle>Counter</PageTitle>
 
 <MudContainer>
   <MudText Typo=Typo.h3>Counter</MudText>
   <MudText>Current count: @currentCount</MudText>
-  <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=IncrementCount>Click me</MudButton>
+  <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=IncrementCount>@loc["Click me"]</MudButton>
 
 </MudContainer>
 
