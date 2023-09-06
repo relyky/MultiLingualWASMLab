@@ -1,29 +1,47 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
 @inject IWeatherForecastApi bizApi
+@inject IStringLocalizer<FetchData> loc
 
 <PageTitle>Weather forecast</PageTitle>
 
 <MudContainer>
-  <MudText Typo=Typo.h3>Weather forecast</MudText>
-  <MudText>This component demonstrates fetching data from the server.</MudText>
+  <MudText Typo=Typo.h3>@loc["Weather forecast"]</MudText>
+  <MudText>@loc["This component demonstrates fetching data from the server."]</MudText>
   <MudToolBar>
-    <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=HandleQuery>刷新</MudButton>
+    <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=HandleQuery Disabled=@f_loading>@loc["Refresh"]</MudButton>
   </MudToolBar>
 
-  @if (forecastList == null)
+  @if (f_loading)
   {
-    <p><em>Loading...</em></p>
+    <p><em>@loc["Loading..."]</em></p>
   }
-  else
+
+  @if(forecastList is not null)
   {
-    <table class="table">
+    <MudDataGrid Items=@forecastList Class="mb-3" Loading=@f_loading>
+      <Columns>
+        <PropertyColumn Property="m => m.Date" Title=@loc["Date"] Format="yyyy/M/d" />
+        <PropertyColumn Property="m => m.TemperatureC" Title=@loc["Temp. (C)"] HeaderStyle="text-align:center" CellStyle="text-align:center" />
+        <PropertyColumn Property="m => m.TemperatureF" Title=@loc["Temp. (F)"] HeaderStyle="text-align:center" CellStyle="text-align:center" />
+        <PropertyColumn Property="m => m.Summary" Title=@loc["Summary"]>
+          <CellTemplate>
+            @loc[context.Item.Summary!]
+          </CellTemplate>
+        </PropertyColumn>
+      </Columns>
+    </MudDataGrid>
+  }
+
+@*  @if (forecastList is not null)
+  {
+    <MudSimpleTable>
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Temp. (C)</th>
-          <th>Temp. (F)</th>
-          <th>Summary</th>
+          <th>@loc["Date"]</th>
+          <th>@loc["Temp. (C)"]</th>
+          <th>@loc["Temp. (F)"]</th>
+          <th>@loc["Summary"]</th>
         </tr>
       </thead>
       <tbody>
@@ -31,18 +49,19 @@
         {
           <tr>
             <td>@forecast.Date.ToShortDateString()</td>
-            <td>@forecast.TemperatureC</td>
-            <td>@forecast.TemperatureF</td>
+            <td style="text-align:center">@forecast.TemperatureC</td>
+            <td style="text-align:center">@forecast.TemperatureF</td>
             <td>@forecast.Summary</td>
           </tr>
         }
       </tbody>
-    </table>
-  }
+    </MudSimpleTable>
+  }*@
 </MudContainer>
 
 @code {
-  private List<WeatherForecast>? forecastList;
+  List<WeatherForecast>? forecastList;
+  bool f_loading = false;
 
   protected override async Task OnInitializedAsync()
   {
@@ -51,6 +70,9 @@
 
   async Task HandleQuery()
   {
+    f_loading = true;
+    await Task.Delay(1000);
     forecastList = await bizApi.WeatherForecastAsync();
+    f_loading = false;
   }
 }

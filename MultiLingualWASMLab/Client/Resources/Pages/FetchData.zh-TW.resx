@@ -117,34 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Address" xml:space="preserve">
-    <value>住址</value>
+  <data name="Balmy" xml:space="preserve">
+    <value>溫暖宜人</value>
   </data>
-  <data name="City" xml:space="preserve">
-    <value>城市</value>
+  <data name="Bracing" xml:space="preserve">
+    <value>清新</value>
   </data>
-  <data name="Country" xml:space="preserve">
-    <value>國家</value>
+  <data name="Chilly" xml:space="preserve">
+    <value>寒冷</value>
   </data>
-  <data name="Credit card nr" xml:space="preserve">
-    <value>信用卡號</value>
+  <data name="Cool" xml:space="preserve">
+    <value>涼爽</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>訂單說明</value>
+  <data name="Date" xml:space="preserve">
+    <value>日期</value>
   </data>
-  <data name="Email" xml:space="preserve">
-    <value>電子郵件</value>
+  <data name="Freezing" xml:space="preserve">
+    <value>極冷</value>
   </data>
-  <data name="Name" xml:space="preserve">
-    <value>名稱</value>
+  <data name="Hot" xml:space="preserve">
+    <value>炎熱</value>
   </data>
-  <data name="Offer" xml:space="preserve">
-    <value>訂單數量</value>
+  <data name="Loading..." xml:space="preserve">
+    <value>載入中…</value>
   </data>
-  <data name="Order" xml:space="preserve">
-    <value>送出訂單</value>
+  <data name="Mild" xml:space="preserve">
+    <value>溫和</value>
   </data>
-  <data name="Simple Form" xml:space="preserve">
-    <value>簡易表單</value>
+  <data name="Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Scorching" xml:space="preserve">
+    <value>炙熱</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>概要</value>
+  </data>
+  <data name="Sweltering" xml:space="preserve">
+    <value>酷熱</value>
+  </data>
+  <data name="Temp. (C)" xml:space="preserve">
+    <value>攝氏氣溫(C)</value>
+  </data>
+  <data name="Temp. (F)" xml:space="preserve">
+    <value>華氏氣溫(F)</value>
+  </data>
+  <data name="This component demonstrates fetching data from the server." xml:space="preserve">
+    <value>該組件演示從服務器獲取數據。</value>
+  </data>
+  <data name="Warm" xml:space="preserve">
+    <value>溫暖</value>
+  </data>
+  <data name="Weather forecast" xml:space="preserve">
+    <value>天氣預報</value>
   </data>
 </root>

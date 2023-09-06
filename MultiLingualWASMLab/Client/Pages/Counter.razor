@@ -5,17 +5,13 @@
 <PageTitle>Counter</PageTitle>
 
 <MudContainer>
-  <MudText Typo=Typo.h3>Counter</MudText>
-  <MudText>Current count: @currentCount</MudText>
-  <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=IncrementCount>@loc["Click me"]</MudButton>
+  <MudText Typo=Typo.h3 GutterBottom>@loc["Counter"]</MudText>
 
-  <MudAlert Severity=Severity.Normal>
-    <span style="font-size:2em">@( $"click {currentCount} times")</span> 
-  </MudAlert>
-
-  <MudAlert Severity=Severity.Info>
+  <MudAlert Severity=Severity.Info Class="mb-3">
     <span style="font-size:2em">@String.Format(loc["click {0} times"], currentCount)</span>
   </MudAlert>
+
+  <MudButton Variant=Variant.Filled Color=Color.Primary OnClick=IncrementCount>@loc["Click me"]</MudButton>
 
 </MudContainer>
 

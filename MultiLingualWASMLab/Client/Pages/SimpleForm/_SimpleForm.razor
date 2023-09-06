@@ -8,7 +8,7 @@
 
 <CustomOverlay Visible=f_loading />
 <MudContainer>
-  <MudText Typo=Typo.h3>Simple Form</MudText>
+  <MudText Typo=Typo.h3>@loc["Simple Form"]</MudText>
 
   <MudCard>
     <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@orderValidator.Validation ValidationDelay=0>
@@ -71,7 +71,7 @@
       </MudCardContent>
     </MudForm>
     <MudCardActions>
-      <MudButton ButtonType=ButtonType.Submit Variant=Variant.Filled Color=Color.Primary Class="ml-auto" Disabled=@(!f_isValid) OnClick=HandleSubmit>Order</MudButton>
+      <MudButton ButtonType=ButtonType.Submit Variant=Variant.Filled Color=Color.Primary Class="ml-auto" Disabled=@(!f_isValid) OnClick=HandleSubmit>@loc["Order"]</MudButton>
     </MudCardActions>
   </MudCard>
 

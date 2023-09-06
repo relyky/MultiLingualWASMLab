@@ -117,10 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Click me" xml:space="preserve">
-    <value>點擊</value>
-  </data>
-  <data name="click {0} times" xml:space="preserve">
-    <value>點擊{0}次</value>
+  <data name="Index Page" xml:space="preserve">
+    <value>Index Page</value>
   </data>
 </root>

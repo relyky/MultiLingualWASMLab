@@ -117,34 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Address" xml:space="preserve">
-    <value>住址</value>
-  </data>
-  <data name="City" xml:space="preserve">
-    <value>城市</value>
-  </data>
-  <data name="Country" xml:space="preserve">
-    <value>國家</value>
-  </data>
-  <data name="Credit card nr" xml:space="preserve">
-    <value>信用卡號</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>訂單說明</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>電子郵件</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>名稱</value>
-  </data>
-  <data name="Offer" xml:space="preserve">
-    <value>訂單數量</value>
-  </data>
-  <data name="Order" xml:space="preserve">
-    <value>送出訂單</value>
-  </data>
-  <data name="Simple Form" xml:space="preserve">
-    <value>簡易表單</value>
+  <data name="Index Page" xml:space="preserve">
+    <value>首頁</value>
   </data>
 </root>
