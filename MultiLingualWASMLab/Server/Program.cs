@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.IdentityModel.Tokens;
+using MultiLingualWASMLab.Server.Authentication;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 /// 參考：[.NET 6.0 如何使用 Serilog 對應用程式事件進行結構化紀錄](https://blog.miniasp.com/post/2021/11/29/How-to-use-Serilog-with-NET-6)
 Log.Logger = new LoggerConfiguration()
@@ -20,6 +24,26 @@ try
   #region //§§ Add services to the container. -------------------------------------------
   builder.Services.AddControllersWithViews();
   builder.Services.AddRazorPages();
+
+  //## for Authz.
+  builder.Services.AddAuthentication(options =>
+  {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  }).AddJwtBearer(options =>
+  {
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+      ValidateIssuerSigningKey = true,
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
+      ValidateIssuer = false,
+      ValidateAudience = false
+    };
+  });
+  builder.Services.AddSingleton<UserAccountService>();
+
   #endregion
 
   var app = builder.Build();
@@ -41,7 +65,7 @@ try
   app.UseBlazorFrameworkFiles();
   app.UseStaticFiles();
 
-  /// 格式化紀錄內容
+  /// Serilog - 格式化紀錄內容
   app.UseSerilogRequestLogging(options =>
   {
     // Customize the message template
@@ -63,6 +87,10 @@ try
   });
 
   app.UseRouting();
+
+  //## for Authz.
+  app.UseAuthentication();
+  app.UseAuthorization();
 
   #endregion
 

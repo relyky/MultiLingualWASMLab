@@ -5,6 +5,9 @@ using MultiLingualWASMLab.Client.RefitClient;
 using MudBlazor.Services;
 using Refit;
 using Blazored.LocalStorage;
+using Blazored.SessionStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using MultiLingualWASMLab.Client.Authentication;
 
 //## 多國語系 - FluentValidation
 FluentValidation.ValidatorOptions.Global.DisplayNameResolver = (type, member, expression) => GT.ResolveDisplayName(member);
@@ -22,16 +25,24 @@ builder.Services.AddLocalization(options =>
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorageAsSingleton();
+builder.Services.AddBlazoredSessionStorageAsSingleton();
+
+//## for Authz.
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddTransient<AuthHeaderHandler>();
 
 //## 註冊 RefitClient API。 --- 手動一個一個註冊
 builder.Services
     .AddRefitClient<IWeatherForecastApi>()
-    .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+    .AddHttpMessageHandler<AuthHeaderHandler>();
 
 //## 註冊 RefitClient API。 --- 手動一個一個註冊
 builder.Services
     .AddRefitClient<IOrderApi>()
-    .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+    .AddHttpMessageHandler<AuthHeaderHandler>();
 
 //§§ await builder.Build().RunAsync(); ----------------------------------------
 var host = builder.Build();

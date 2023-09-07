@@ -1,8 +1,31 @@
-﻿@inject IStringLocalizer<NavMenu> loc
+﻿@using MultiLingualWASMLab.Client.Authentication
+@inject IJSRuntime jsr
+@inject AuthenticationStateProvider authBase
+@inject NavigationManager navSvc
+@inject IStringLocalizer<NavMenu> loc
 
 <MudNavMenu>
   <MudNavLink Href="/" Match=NavLinkMatch.All>@loc["Home"]</MudNavLink>
   <MudNavLink Href="/counter">@loc["Counter"]</MudNavLink>
   <MudNavLink Href="/fetchdata">@loc["Fetch data"]</MudNavLink>
   <MudNavLink Href="/simpleform">@loc["Simple Form"]</MudNavLink>
+
+  <AuthorizeView>
+    <Authorized>
+      <MudNavLink OnClick=HandleLogout>@loc["Logout"]</MudNavLink>
+    </Authorized>
+    <NotAuthorized>
+      <MudNavLink Href="/login">@loc["Login"]</MudNavLink>
+    </NotAuthorized>
+  </AuthorizeView>
 </MudNavMenu>
+
+@code {
+
+  async Task HandleLogout()
+  {
+    var authProvider = (CustomAuthenticationStateProvider)authBase;
+    await authProvider.UpdateAuthenticationStateAsync(null);
+    navSvc.NavigateTo("/", false); // 登出不用強制刷新畫面。
+  }
+}

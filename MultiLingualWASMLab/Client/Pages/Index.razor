@@ -1,8 +1,54 @@
 ﻿@page "/"
+@attribute [AllowAnonymous]
 @inject IStringLocalizer<Index> loc
+@inject IJSRuntime jsr
 
 <PageTitle>Index</PageTitle>
 
 <MudContainer>
   <MudText Typo=Typo.h1 Align=Align.Center>@loc["Index Page"]</MudText>
+
+  <AuthorizeView>
+    <Authorized>
+      <h1>Hello, @context.User.Identity?.Name</h1>
+    </Authorized>
+    <NotAuthorized>
+      <h1>Hello, Guest</h1>
+    </NotAuthorized>
+  </AuthorizeView>
+
+  <br />
+  <br />
+
+  <MudText Typo="Typo.h4">登入狀態:AuthorizeView</MudText>
+  <AuthorizeView Context="auth">
+    <Authorized>
+      <b>Hello, @auth.User.Identity?.Name</b>
+      <p>
+        Roles: @(String.Join(",", auth.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))
+      </p>
+    </Authorized>
+    <NotAuthorized>
+      <p>授權不足！</p>
+    </NotAuthorized>
+  </AuthorizeView>
+
+  <br />
+  <br />
+
+  <AuthorizeView>
+    <MudButton OnClick=DisplayGreetingAlert>Display Greeting Alert</MudButton>
+  </AuthorizeView>
+
 </MudContainer>
+
+@code {
+  [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+  async Task DisplayGreetingAlert()
+  {
+    var authState = await AuthenticationState;
+    var message = $"Hello {authState.User.Identity?.Name}";
+    await jsr.InvokeVoidAsync("alert", message);
+  }
+}

@@ -1,0 +1,76 @@
+﻿@using MultiLingualWASMLab.Client.Authentication
+@page "/login"
+@attribute [AllowAnonymous]
+@inject HttpClient http
+@inject IJSRuntime jsr
+@inject AuthenticationStateProvider authBase
+@inject NavigationManager navSvc
+@inject IStringLocalizer<Login> loc
+
+<MudCard Class="ma-auto" Style="width:300px">
+  <MudCardContent>
+
+    <MudText Typo=Typo.h3>Login</MudText>
+    <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@formValidator.Validation ValidationDelay=0>
+      <MudTextField @bind-Value=@formData.UserName
+                    For="()=> formData.UserName"
+                    Immediate=false
+                    Label="User Name" />
+
+      <MudTextField @bind-Value=@formData.Mima
+                    For="()=> formData.Mima"
+                    Immediate=false
+                    Label="Password" />
+
+      <MudButton ButtonType=ButtonType.Submit
+                 Variant=Variant.Filled
+                 Color=Color.Primary
+                 Disabled=@(!f_isValid || f_loading)
+                 OnClick=HandleSubmit>@loc["Login"]</MudButton>
+    </MudForm>
+
+  </MudCardContent>
+</MudCard>
+
+
+@code {
+  //## Resource
+  MudForm refForm = default!;
+  LoginRequestValidator formValidator = new();
+
+  //## State
+  LoginRequest formData = new();
+  bool f_loading = false;
+  bool f_isValid = false;
+
+  async Task HandleSubmit()
+  {
+    try
+    {
+      f_loading = true;
+
+      var resp = await http.PostAsJsonAsync("/api/Account/Login", formData);
+      if (resp.IsSuccessStatusCode)
+      {
+        var userSession = await resp.Content.ReadFromJsonAsync<UserSession>();
+        // 更新登入狀態
+        var authProvider = (CustomAuthenticationStateProvider)authBase;
+        await authProvider.UpdateAuthenticationStateAsync(userSession);
+        // 登入成功後轉址，並強制刷新畫面。
+        navSvc.NavigateTo("/", true);
+      }
+      else
+      {
+        await jsr.InvokeVoidAsync("alert", "Invalid User Name or Password");
+      }
+    }
+    catch(Exception ex)
+    {
+      await jsr.InvokeVoidAsync("alert", $"Exception! {ex.Message}");
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+}

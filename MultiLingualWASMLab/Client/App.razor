@@ -1,12 +1,29 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<CascadingAuthenticationState>
+  <Router AppAssembly="@typeof(App).Assembly" PreferExactMatches>
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+      <AuthorizeRouteView RouteData=@routeData DefaultLayout=@typeof(MainLayout)>
+        <Authorizing>
+          <div class="text-center my-16 pa-8">
+            <MudText Typo=Typo.h1>Authorizing</MudText>
+            <MudText Typo=Typo.h2>授權處理中…</MudText>
+          </div>
+        </Authorizing>
+        <NotAuthorized>
+          <div class="text-center pa-8">
+            <MudText Typo=Typo.h1>401 NotAuthorized</MudText>
+            <MudImage Src="image/youshallnotpass.png" Alt="You Shall Not Pass!" Elevation="25" Class="rounded-lg" />
+            <MudText Typo=Typo.h2>未授權或已登出此系統！</MudText>
+            <MudButton Variant=Variant.Outlined Color=Color.Primary Size=Size.Large Href="/" Class="my-8">重新進入系統</MudButton>
+          </div>
+        </NotAuthorized>
+      </AuthorizeRouteView>
+      @*<FocusOnNavigate RouteData="@routeData" Selector="h1" />*@
     </Found>
     <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
+      <PageTitle>Not found</PageTitle>
+      <LayoutView Layout="@typeof(MainLayout)">
+        <p role="alert">Sorry, there's nothing at this address.</p>
+      </LayoutView>
     </NotFound>
-</Router>
+  </Router>
+</CascadingAuthenticationState>

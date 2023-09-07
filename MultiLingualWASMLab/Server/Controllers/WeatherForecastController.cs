@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MultiLingualWASMLab.DTO;
 
@@ -20,6 +21,7 @@ namespace MultiLingualWASMLab.Server.Controllers
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public List<WeatherForecast> Get()
     {
       return Enumerable.Range(1, 5).Select(index => new WeatherForecast

@@ -1,10 +1,13 @@
 ﻿using Blazored.LocalStorage;
 using Blazored.LocalStorage.StorageOptions;
+using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MultiLingualWASMLab.Client;
@@ -27,6 +30,28 @@ public static class ThisProjectClassExtensions
     CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
   }
 
+  /// <summary>
+  /// Session Storage 增強
+  /// </summary>
+  public static async Task SaveItemEncryptedAsync<T>(this ISessionStorageService sessionStorage, string key, T item)
+  {
+    var itemJson = JsonSerializer.Serialize(item);
+    var itemJsonBytes = Encoding.UTF8.GetBytes(itemJson); //--- 增強加密強度
+    var base64Json = Convert.ToBase64String(itemJsonBytes);
+    await sessionStorage.SetItemAsync(key, base64Json);
+  }
+
+  /// <summary>
+  /// Session Storage 增強
+  /// </summary>
+  public static async Task<T> ReadEncryptedItemAsync<T>(this ISessionStorageService sessionStorage, string key)
+  {
+    var base64Json = await sessionStorage.GetItemAsync<string>(key);
+    var itemJsonBytes = Convert.FromBase64String(base64Json);
+    var itemJson = Encoding.UTF8.GetString(itemJsonBytes);
+    var item = JsonSerializer.Deserialize<T>(itemJson);
+    return item!;
+  }
 }
 
 /// <summary>
