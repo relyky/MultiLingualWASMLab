@@ -5,7 +5,6 @@ using MultiLingualWASMLab.Client.RefitClient;
 using MudBlazor.Services;
 using Refit;
 using Blazored.LocalStorage;
-using System.Globalization;
 
 //## 多國語系 - FluentValidation
 FluentValidation.ValidatorOptions.Global.DisplayNameResolver = (type, member, expression) => GT.ResolveDisplayName(member);
@@ -17,7 +16,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 //## 多國語系
 builder.Services.AddLocalization(options =>
 {
-  options.ResourcesPath = "Resources";
+  options.ResourcesPath = "Resources"; // 指定『多國語系資源區』
 });
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
@@ -36,5 +35,5 @@ builder.Services
 
 //§§ await builder.Build().RunAsync(); ----------------------------------------
 var host = builder.Build();
-await host.SetDefaultCultureAsync(); // 設定預設語系
+await host.SetDefaultCultureAsync(); // 設定(預設)語系
 await host.RunAsync();

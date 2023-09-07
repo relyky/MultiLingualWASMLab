@@ -29,8 +29,12 @@
         : LocalizerSettings.SupportedCulturesWithName.FirstOrDefault(c => c.Culture == culture);
   }
 
+  /// <summary>
+  /// 切換語系
+  /// </summary>
   async Task HandleCultureChange(ChangeEventArgs args)
   {
+    //## 切換語系：將指定的新語系存入 localStorage 然後(刷新)重新開啟現在網址。
     string cultureString = args.Value?.ToString()!;
     await localStorage.SetItemAsync<string>("culture", cultureString);
     navSvc.NavigateTo(navSvc.Uri, true); // refresh current page.
