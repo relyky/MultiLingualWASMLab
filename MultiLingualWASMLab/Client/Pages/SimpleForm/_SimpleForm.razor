@@ -1,4 +1,5 @@
 ﻿@page "/simpleform"
+@attribute [Authorize(Roles = "User,Admin")]
 @inject ISnackbar snackSvc
 @inject IOrderApi bizApi
 @inject IDialogService dlgSvc

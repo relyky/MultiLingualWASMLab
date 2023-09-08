@@ -21,8 +21,13 @@
     </Found>
     <NotFound>
       <PageTitle>Not found</PageTitle>
-      <LayoutView Layout="@typeof(MainLayout)">
-        <p role="alert">Sorry, there's nothing at this address.</p>
+      <LayoutView Layout=@typeof(NoLayout)>
+        <div class="text-center my-16 pa-8">
+          <MudText Typo=Typo.h1>404 NotFound!</MudText>
+          <MudText Typo=Typo.h2>Your princess is in another castle.</MudText>
+          @*<MudText Typo=Typo.h2>找不到目標網址或功能作業！</MudText>*@
+          <MudButton Variant=Variant.Outlined Color=Color.Primary Size=Size.Large Href="/" Class="my-8">重新進入系統</MudButton>
+        </div>
       </LayoutView>
     </NotFound>
   </Router>
