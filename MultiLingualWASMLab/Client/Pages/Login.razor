@@ -6,31 +6,36 @@
 @inject AuthenticationStateProvider authBase
 @inject NavigationManager navSvc
 @inject IStringLocalizer<Login> loc
+@layout LoginLayout
 
-<MudCard Class="ma-auto" Style="width:300px">
-  <MudCardContent>
+<div class="background-container">
+  <div class="background-animation" style="display:flex">
+    <MudCard Class="ma-auto" Style="width:300px; background-color: rgba(141,217,247,.6)">
+      <MudCardContent Style="background-color: inherit">
 
-    <MudText Typo=Typo.h3>Login</MudText>
-    <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@formValidator.Validation ValidationDelay=0>
-      <MudTextField @bind-Value=@formData.UserName
-                    For="()=> formData.UserName"
-                    Immediate=false
-                    Label="User Name" />
+        <MudText Typo=Typo.h3>Login</MudText>
+        <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@formValidator.Validation ValidationDelay=0>
+          <MudTextField @bind-Value=@formData.UserName
+                        For="()=> formData.UserName"
+                        Immediate=false
+                        Label="User Name" />
 
-      <MudTextField @bind-Value=@formData.Mima
-                    For="()=> formData.Mima"
-                    Immediate=false
-                    Label="Password" />
+          <MudTextField @bind-Value=@formData.Mima
+                        For="()=> formData.Mima"
+                        Immediate=false
+                        Label="Password" />
 
-      <MudButton ButtonType=ButtonType.Submit
-                 Variant=Variant.Filled
-                 Color=Color.Primary
-                 Disabled=@(!f_isValid || f_loading)
-                 OnClick=HandleSubmit>@loc["Login"]</MudButton>
-    </MudForm>
+          <MudButton ButtonType=ButtonType.Submit
+                     Variant=Variant.Filled
+                     Color=Color.Primary
+                     Disabled=@(!f_isValid || f_loading)
+                     OnClick=HandleSubmit>@loc["Login"]</MudButton>
+        </MudForm>
 
-  </MudCardContent>
-</MudCard>
+      </MudCardContent>
+    </MudCard>
+  </div>
+</div> 
 
 
 @code {
