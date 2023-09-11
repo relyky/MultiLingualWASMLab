@@ -68,4 +68,85 @@ public class JwtAuthenticationManager
 
     return userSession;
   }
+
+  public UserSession? RefreshJwtToken(string token)
+  {
+    var validatedPrincipal = GetPrincipalFromToken(token);
+    if(validatedPrincipal == null) 
+      return null;
+
+    // 再檢查一次過期時限...
+
+    // 
+    ClaimsIdentity? claimsIdentity = validatedPrincipal.Identity as ClaimsIdentity;
+    if (claimsIdentity == null)
+      return null;
+
+    /* Re-generating JWT Token */
+    var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES);
+    var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
+
+    var signingCredentials = new SigningCredentials(
+      new SymmetricSecurityKey(tokenKey),
+      SecurityAlgorithms.HmacSha256Signature);
+
+    var securityTokenDescriptor = new SecurityTokenDescriptor
+    {
+      Subject = claimsIdentity,
+      Expires = tokenExpiryTimeStamp,
+      SigningCredentials = signingCredentials
+    };
+
+    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+    var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
+    var newToken = jwtSecurityTokenHandler.WriteToken(securityToken);
+
+    /* Returning the User Session object */
+    var userSession = new UserSession
+    {
+      UserName = claimsIdentity.Name!,
+      Role = claimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value!,
+      Token = newToken,
+      ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds,
+      //ExpiryTimeStamp = tokenExpiryTimeStamp 
+    };
+
+    return userSession;
+  }
+
+  private ClaimsPrincipal? GetPrincipalFromToken(string token)
+  {
+    var tokenHandler = new JwtSecurityTokenHandler();
+
+    //※ copy from Program.cs --- 可以做成 singleton.... ref:https://youtu.be/AU0TIOZhGqs?si=IJIKn__GeC_FC38n&t=416
+    var _tokenValidationParameter = new TokenValidationParameters
+    {
+      ValidateIssuerSigningKey = true,
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
+      ValidateIssuer = false,
+      ValidateAudience = false
+    };
+
+    try
+    {
+      var principal = tokenHandler.ValidateToken(token, _tokenValidationParameter, out var validatedToken);
+      if(!IsJwtWithValidSecurityAlgorithm(validatedToken)) 
+      {
+        return null;
+      }
+
+      return principal;
+    }
+    catch
+    {
+      return null;
+    }
+  }
+
+  private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
+  {
+    return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
+      jwtSecurityToken.Header.Alg.Equals(value: SecurityAlgorithms.HmacSha256,
+        StringComparison.InvariantCultureIgnoreCase);
+  }
 }

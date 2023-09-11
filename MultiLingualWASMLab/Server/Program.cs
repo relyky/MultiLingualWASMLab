@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
@@ -26,13 +27,17 @@ try
   builder.Services.AddRazorPages();
 
   //## for Authz.
-  builder.Services.AddAuthentication(options =>
+  builder.Services.AddAuthentication(option =>
   {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
   }).AddJwtBearer(options =>
   {
+#if DEBUG
     options.RequireHttpsMetadata = false;
+#endif
+
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
