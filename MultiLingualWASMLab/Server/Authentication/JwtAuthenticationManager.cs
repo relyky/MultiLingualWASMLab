@@ -1,114 +1,100 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using MultiLingualWASMLab.DTO;
+using MultiLingualWASMLab.Server.Controllers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 
 namespace MultiLingualWASMLab.Server.Authentication;
 
-public class JwtAuthenticationManager
+class JwtAuthenticationManager
 {
-  public const string JWT_SECURITY_KEY = "1234567890123456789012345678901234567890"; //--- 想辦法利用 HASH + today + salt 算的算出來。
-  private const int JWT_TOKEN_VALIDITY_MINUTES = 20; //--- 參數化
+  //public const string JWT_SECURITY_KEY = "1234567890123456789012345678901234567890"; //--- 想辦法利用 HASH + today + salt 算的算出來。
+  //private const int JWT_TOKEN_VALIDITY_MINUTES = 20; //--- 參數化
 
   UserAccountService _userAccountService;
-  
-  public JwtAuthenticationManager(UserAccountService userAccountService)
+  IConfiguration _config;
+  TokenValidationParameters _tokenValidationParameters;
+
+  public JwtAuthenticationManager(UserAccountService userAccountService, IConfiguration config, TokenValidationParameters tokenValidationParameters)
   {
     _userAccountService = userAccountService;
+    _config = config;
+    _tokenValidationParameters = tokenValidationParameters;
   }
 
-  public UserSession? GenerateJwtToken(string userName, string mima) //--- 拆成二段：把認證與授權分開
+  public UserSession? GenerateJwtToken(UserAccount account) //--- 拆成二段：把認證與授權分開
   {
-    if(String.IsNullOrWhiteSpace(userName) || String.IsNullOrWhiteSpace(mima))
-      return null;
+    var key = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
 
-    /* Validating the User Credentials */
-    // ---- 認證登入者
-    var userAccount = _userAccountService.GetUserAccount(userName);
-    if (userAccount == null || userAccount.Mima != mima)
-      return null;
+    var claims = new List<Claim>
+      {
+        new Claim(ClaimTypes.Name, account.UserName),
+        new Claim(ClaimTypes.Role, account.Role)
+      };
 
-    // --- 取得授權，並轉換成 Role。
-
-    /* Generating JWT Token */
-    var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES);
-    var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
-    var claimsIdentity = new ClaimsIdentity(new List<Claim>
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
+    var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
     {
-      new Claim(ClaimTypes.Name, userAccount.UserName),
-      new Claim(ClaimTypes.Role, userAccount.Role)
+      Subject = new ClaimsIdentity(claims),
+      Expires = expiresUtcTime,
+      Issuer = _config["JwtSettings:Issuer"],
+      Audience = _config["JwtSettings:Audience"],
+      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
     });
 
-    var signingCredentials = new SigningCredentials(
-      new SymmetricSecurityKey(tokenKey),
-      SecurityAlgorithms.HmacSha256Signature);
-
-    var securityTokenDescriptor = new SecurityTokenDescriptor
-    {
-      Subject = claimsIdentity,
-      Expires = tokenExpiryTimeStamp,
-      SigningCredentials = signingCredentials
-    };
-
-    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-    var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
-    var token = jwtSecurityTokenHandler.WriteToken(securityToken);
+    string jwtToken = tokenHandler.WriteToken(token);
 
     /* Returning the User Session object */
     var userSession = new UserSession
     {
-      UserName = userAccount.UserName,
-      Role = userAccount.Role,
-      Token = token,
-      ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds,
-      //ExpiryTimeStamp = tokenExpiryTimeStamp 
+      UserName = account.UserName,
+      Role = account.Role,
+      Token = jwtToken,
+      ExpiresUtcTime = expiresUtcTime
     };
-
     return userSession;
   }
 
   public UserSession? RefreshJwtToken(string token)
   {
-    var validatedPrincipal = GetPrincipalFromToken(token);
-    if(validatedPrincipal == null) 
+    var claimsUser = GetPrincipalFromToken(token);
+    if (claimsUser == null)
       return null;
 
-    // 再檢查一次過期時限...
+    // 再檢查一次過期時限...未實作
 
-    // 
-    ClaimsIdentity? claimsIdentity = validatedPrincipal.Identity as ClaimsIdentity;
+    //## 產生 token
+    ClaimsIdentity? claimsIdentity = claimsUser.Identity as ClaimsIdentity;
     if (claimsIdentity == null)
       return null;
 
     /* Re-generating JWT Token */
-    var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES);
-    var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
+    var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
+    var key = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
 
-    var signingCredentials = new SigningCredentials(
-      new SymmetricSecurityKey(tokenKey),
-      SecurityAlgorithms.HmacSha256Signature);
-
-    var securityTokenDescriptor = new SecurityTokenDescriptor
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var newToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
     {
       Subject = claimsIdentity,
-      Expires = tokenExpiryTimeStamp,
-      SigningCredentials = signingCredentials
-    };
+      Expires = expiresUtcTime,
+      Issuer = _config["JwtSettings:Issuer"],
+      Audience = _config["JwtSettings:Audience"],
+      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    });
 
-    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-    var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
-    var newToken = jwtSecurityTokenHandler.WriteToken(securityToken);
+    string newJwtToken = tokenHandler.WriteToken(newToken);
 
     /* Returning the User Session object */
     var userSession = new UserSession
     {
       UserName = claimsIdentity.Name!,
       Role = claimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value!,
-      Token = newToken,
-      ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds,
-      //ExpiryTimeStamp = tokenExpiryTimeStamp 
+      Token = newJwtToken,
+      ExpiresUtcTime = expiresUtcTime
     };
 
     return userSession;
@@ -116,24 +102,12 @@ public class JwtAuthenticationManager
 
   private ClaimsPrincipal? GetPrincipalFromToken(string token)
   {
-    var tokenHandler = new JwtSecurityTokenHandler();
-
-    //※ copy from Program.cs --- 可以做成 singleton.... ref:https://youtu.be/AU0TIOZhGqs?si=IJIKn__GeC_FC38n&t=416
-    var _tokenValidationParameter = new TokenValidationParameters
-    {
-      ValidateIssuerSigningKey = true,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
-      ValidateIssuer = false,
-      ValidateAudience = false
-    };
-
     try
     {
-      var principal = tokenHandler.ValidateToken(token, _tokenValidationParameter, out var validatedToken);
-      if(!IsJwtWithValidSecurityAlgorithm(validatedToken)) 
-      {
+      var tokenHandler = new JwtSecurityTokenHandler();
+      var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+      if (!IsJwtWithValidSecurityAlgorithm(validatedToken))
         return null;
-      }
 
       return principal;
     }

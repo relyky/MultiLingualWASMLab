@@ -28,9 +28,12 @@ class AuthHeaderHandler : DelegatingHandler
     string token = await authProvider.GetTokenAsync();
 
     //※ potentially refresh token here if it has expired etc.
-    UserSession? newUserSession = await RefreshTokenAsync(token);
-    if(newUserSession != null)
-      token = newUserSession.Token;
+    if(true /* token 快過期了 */)
+    {
+      UserSession? newUserSession = await RefreshTokenAsync(token);
+      if (newUserSession != null)
+        token = newUserSession.Token;
+    }
 
     //## GO
     if (!String.IsNullOrWhiteSpace(token))

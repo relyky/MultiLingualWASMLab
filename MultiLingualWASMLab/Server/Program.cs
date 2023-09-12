@@ -26,28 +26,38 @@ try
   builder.Services.AddControllersWithViews();
   builder.Services.AddRazorPages();
 
-  //## for Authz.
+  //## for Authentication & Authorization
+  var tokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SigningKey"])),
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+  };
+
   builder.Services.AddAuthentication(option =>
   {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-  }).AddJwtBearer(options =>
+  }).AddJwtBearer(option =>
   {
 #if DEBUG
-    options.RequireHttpsMetadata = false;
+    option.RequireHttpsMetadata = false;
 #endif
-
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-      ValidateIssuerSigningKey = true,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
-      ValidateIssuer = false,
-      ValidateAudience = false
-    };
+    option.SaveToken = true;
+    option.TokenValidationParameters = tokenValidationParameters;
+  });
+  builder.Services.AddAuthorization(option =>
+  {
+    option.AddPolicy(IdentityAttr.AdminPolicyName, p =>
+      p.RequireClaim(IdentityAttr.AdminClaimName, "true"));
   });
   builder.Services.AddSingleton<UserAccountService>();
+  builder.Services.AddSingleton(tokenValidationParameters);
 
   #endregion
 
@@ -93,7 +103,7 @@ try
 
   app.UseRouting();
 
-  //## for Authz.
+  //## for Authentication & Authorization
   app.UseAuthentication();
   app.UseAuthorization();
 

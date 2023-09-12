@@ -47,7 +47,6 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         new Claim(ClaimTypes.Role, userSession.Role)
       })); //--- 不用加 "JwtAuth"？
 
-      userSession.ExpiryTimeStamp = DateTime.Now.AddSeconds(userSession.ExpiresIn); //--- 應該在後端就算好到期時間
       await _sessionStorage.SaveItemEncryptedAsync("UserSession", userSession);
       NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
     }
@@ -65,7 +64,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     try
     {
       var userSession = await _sessionStorage.ReadEncryptedItemAsync<UserSession>("UserSession");
-      if (userSession != null && DateTime.Now < userSession.ExpiryTimeStamp)
+      if (userSession != null && DateTime.UtcNow < userSession.ExpiresUtcTime)
         result = userSession.Token;
     }
     catch{ /* 防止當掉 */ }

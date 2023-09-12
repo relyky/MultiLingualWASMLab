@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MultiLingualWASMLab.DTO;
 using MultiLingualWASMLab.Server.Authentication;
 using System.Net.Http.Headers;
@@ -13,27 +14,40 @@ namespace MultiLingualWASMLab.Server.Controllers;
 public class AccountController : ControllerBase
 {
   readonly UserAccountService _userAccountService;
+  readonly IConfiguration _config;
+  readonly TokenValidationParameters _tokenValidationParameters;
 
-  public AccountController(UserAccountService userAccountService)
+  public AccountController(UserAccountService userAccountService, IConfiguration config, TokenValidationParameters tokenValidationParameters)
   {
     _userAccountService = userAccountService;
+    _config = config;
+    _tokenValidationParameters = tokenValidationParameters;
   }
 
-  [HttpPost]
-  [Route("Login")]
+  [HttpPost("[action]")]
   [AllowAnonymous]
   public ActionResult<UserSession> Login([FromBody] LoginRequest request)
   {
-    var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService);
-    var userSession = jwtAuthenticationManager.GenerateJwtToken(request.UserName, request.Mima);
+    //## Validating the User Credentials
+    if (String.IsNullOrWhiteSpace(request.UserName) || String.IsNullOrWhiteSpace(request.Mima))
+      return Unauthorized();
+
+    // ---- 認證登入者
+    UserAccount? userAccount = _userAccountService.GetUserAccount(request.UserName);
+    if (userAccount == null || userAccount.Mima != request.Mima)
+      return Unauthorized();
+
+    //※ 已通過帳密檢查
+
+    var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService, _config, _tokenValidationParameters);
+    var userSession = jwtAuthenticationManager.GenerateJwtToken(userAccount);
     if (userSession is null)
       return Unauthorized();
 
     return userSession;
   }
 
-  [HttpPost]
-  [Route("RefreshToken")]
+  [HttpPost("[action]")]
   [Authorize]
   public ActionResult<UserSession> RefreshToken([FromHeader] string authorization)
   {
@@ -50,11 +64,18 @@ public class AccountController : ControllerBase
     if (token is null)
       return null!;
 
-    var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService);
+    var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService, _config, _tokenValidationParameters);
     var userSession = jwtAuthenticationManager.RefreshJwtToken(token);
     if (userSession is null)
       return Unauthorized();
 
     return userSession;
   }
+}
+
+public class TokenGenerationRequest
+{
+  public Guid UserId { get; set; }
+  public string Email { get; set; } = string.Empty;
+  public Dictionary<string, string>? CustomClaims { get; set; }
 }
