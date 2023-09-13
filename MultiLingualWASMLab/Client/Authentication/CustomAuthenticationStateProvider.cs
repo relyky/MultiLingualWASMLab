@@ -42,19 +42,16 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     }
   }
 
+  /// <summary>
+  /// 更新登入狀態並通告
+  /// </summary>
   internal async Task UpdateAuthenticationStateAsync(AuthUser? authUser)
   {
     if (authUser != null)
     {
-      ClaimsIdentity identity = new ClaimsIdentity("JwtAuth");
-      identity.AddClaim(new Claim(ClaimTypes.Name, authUser.UserId));
-      identity.AddClaim(new Claim(ClaimTypes.GivenName, authUser.UserName));
-      identity.AddClaims(authUser.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-      ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-
       await _sessionStorage.SaveItemEncryptedAsync("UserSession", authUser);
-      NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(principal)));
+      var authState = await this.GetAuthenticationStateAsync();
+      NotifyAuthenticationStateChanged(Task.FromResult(authState));
     }
     else
     {
@@ -71,7 +68,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
       if (authUser == null) return;
 
       authUser = authUser with { Token = newToken };
-      await _sessionStorage.SaveItemEncryptedAsync("UserSession", authUser);
+      await this.UpdateAuthenticationStateAsync(authUser); // 更新登入狀態並通告
     }
     catch { /* 防止當掉 */ }
   }

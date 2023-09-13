@@ -3,6 +3,7 @@
 @inject HttpClient Http
 @inject IWeatherForecastApi bizApi
 @inject IStringLocalizer<FetchData> loc
+@inject IDialogService dlgSvc
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -71,9 +72,20 @@
 
   async Task HandleQuery()
   {
-    f_loading = true;
-    await Task.Delay(1000);
-    forecastList = await bizApi.WeatherForecastAsync();
-    f_loading = false;
+    try
+    {
+      f_loading = true;
+      await Task.Delay(1000);
+      forecastList = await bizApi.WeatherForecastAsync();
+    }
+    catch(Exception ex)
+    {
+      dlgSvc.ShowMessageBox("出現例外！", ex.Message)
+            .AndForget();
+    }
+    finally
+    {
+      f_loading = false;
+    }
   }
 }

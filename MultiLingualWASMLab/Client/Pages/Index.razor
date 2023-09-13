@@ -33,9 +33,9 @@
   [CascadingParameter] Task<AuthenticationState> AuthStateTask { get; set; } = default!;
   AuthUser? authUser = null;
 
-  protected override async Task OnInitializedAsync()
+  protected override async Task OnParametersSetAsync()
   {
-    await base.OnInitializedAsync();
+    await base.OnParametersSetAsync();
     var authState = await AuthStateTask;
     authUser = await authState.UnpackAuthDataAsync();
   }
