@@ -1,28 +1,89 @@
-﻿<MudChip Variant=Variant.Filled Color=Color.Primary Size=Size.Medium>@displayString</MudChip>
+﻿@using System.Timers
+@implements IDisposable
+@inject ISnackbar snackSvc
+
+<MudChip Variant=Variant.Filled Color=Color.Primary Size=Size.Medium>@displayString</MudChip>
 
 @code {
   [CascadingParameter] Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
-  AuthUser? user = null;
+  //## Resource
+  Timer? timer2 = null; // 以秒計數
+
+  //## State
   DateTime expiresTime;
+  string loginUserName = string.Empty;
   string displayString = string.Empty;
 
-  protected override async Task OnInitializedAsync()
+  public void Dispose()
   {
-    await base.OnInitializedAsync();
+    /// ※ 別忘記要釋放 timer 否則會變成無人管理的流浪資源。
+    if(timer2 != null)
+    {
+      timer2.Elapsed -= OnTimerInterval2;
+      timer2.Dispose();
+      timer2 = null;
+    }
+  }
+
+  protected override async Task OnParametersSetAsync()
+  {
+    await base.OnParametersSetAsync();
+    snackSvc.Add($"偵測 AuthState 變更[{DateTime.Now:HH:mm:ss}]", severity: Severity.Info);
 
     //# 取完整的登入者資料
     var authState = await AuthStateTask;
-    user = await authState.UnpackAuthDataAsync();
+    AuthUser? user = await authState.UnpackAuthDataAsync();
     if (user != null)
     {
+      loginUserName = user.UserName;
       expiresTime = user.Token.ExpiresUtcTime!.Value.ToLocalTime();
-      displayString = $"{user.UserName} {expiresTime:HH:mm:ss}";
     }
     else
     {
-      displayString = "未登入";
-    }    
+      loginUserName = string.Empty;
+      expiresTime = DateTime.MinValue;
+    }
   }
 
+  protected override void OnAfterRender(bool firstRender)
+  {
+    base.OnAfterRender(firstRender);
+
+    /// ※ timer 的初始化在 firstRender 執行
+    if (firstRender)
+    {
+      timer2 = new Timer();
+      timer2.Interval = 1000; // 以秒計數
+      timer2.Elapsed += OnTimerInterval2;
+      timer2.AutoReset = true;
+      // Start the timer
+      timer2.Enabled = true;
+    }
+  }
+
+  /// <summary>
+  /// for timer2 以秒鐘倒數
+  /// </summary>
+  void OnTimerInterval2(object? sender, ElapsedEventArgs e)
+  {
+    TimeSpan remain = expiresTime.Subtract(DateTime.Now);
+    if (remain <= TimeSpan.Zero)
+      remain = TimeSpan.Zero;
+
+    // 計算新的顯示字串
+    string tempString = loginUserName == string.Empty ? "未登入" : $"{loginUserName} {remain.Minutes}m{remain.Seconds}s";
+
+    // refresh UI,顯示字串不同才刷新
+    if (tempString != displayString)
+    {
+      displayString = tempString;
+      InvokeAsync(StateHasChanged);
+    }
+
+    //if (remain == TimeSpan.Zero)
+    //{
+    //  //...觸發登出...
+    //}
+  }
 }
