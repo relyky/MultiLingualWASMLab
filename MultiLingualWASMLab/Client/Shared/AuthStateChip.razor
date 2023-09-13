@@ -1,0 +1,28 @@
+﻿<MudChip Variant=Variant.Filled Color=Color.Primary Size=Size.Medium>@displayString</MudChip>
+
+@code {
+  [CascadingParameter] Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+  AuthUser? user = null;
+  DateTime expiresTime;
+  string displayString = string.Empty;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+
+    //# 取完整的登入者資料
+    var authState = await AuthStateTask;
+    user = await authState.UnpackAuthDataAsync();
+    if (user != null)
+    {
+      expiresTime = user.Token.ExpiresUtcTime!.Value.ToLocalTime();
+      displayString = $"{user.UserName} {expiresTime:HH:mm:ss}";
+    }
+    else
+    {
+      displayString = "未登入";
+    }    
+  }
+
+}
