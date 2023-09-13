@@ -123,4 +123,10 @@
   <data name="Logout" xml:space="preserve">
     <value>登出</value>
   </data>
+  <data name="Password" xml:space="preserve">
+    <value>密碼</value>
+  </data>
+  <data name="User ID" xml:space="preserve">
+    <value>帳號</value>
+  </data>
 </root>

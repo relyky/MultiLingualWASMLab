@@ -13,17 +13,19 @@
     <MudCard Class="ma-auto" Style="width:300px; background-color: rgba(141,217,247,.6)">
       <MudCardContent Style="background-color: inherit">
 
-        <MudText Typo=Typo.h3>Login</MudText>
+        <MudText Typo=Typo.h4>@loc["Login"]</MudText>
         <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@formValidator.Validation ValidationDelay=0>
           <MudTextField @bind-Value=@formData.UserId
                         For="()=> formData.UserId"
                         Immediate=false
-                        Label="User Name" />
+                        Label=@loc["User ID"]
+                        Class="mb-3" />
 
           <MudTextField @bind-Value=@formData.Mima
                         For="()=> formData.Mima"
                         Immediate=false
-                        Label="Password" />
+                        Label=@loc["Password"]
+                        Class="mb-3" />
 
           <MudButton ButtonType=ButtonType.Submit
                      Variant=Variant.Filled
@@ -35,7 +37,7 @@
       </MudCardContent>
     </MudCard>
   </div>
-</div> 
+</div>
 
 
 @code {
@@ -69,7 +71,7 @@
         await jsr.InvokeVoidAsync("alert", "Invalid User Name or Password");
       }
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
       await jsr.InvokeVoidAsync("alert", $"Exception! {ex.Message}");
     }
