@@ -25,41 +25,29 @@ class JwtAuthenticationManager
     _tokenValidationParameters = tokenValidationParameters;
   }
 
-  public UserSession? GenerateJwtToken(UserAccount account) //--- 拆成二段：把認證與授權分開
+  public AuthUser? GenerateJwtToken(AuthUser authUser) //--- 拆成二段：把認證與授權分開
   {
-    var key = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
+    ClaimsIdentity identity = new();
+    identity.AddClaim(new Claim(ClaimTypes.Name, authUser.UserId));
+    identity.AddClaim(new Claim(ClaimTypes.GivenName, authUser.UserName));
+    identity.AddClaims(authUser.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-    var claims = new List<Claim>
+    (string jwtToken, DateTime expiresUtcTime) = DoMakeToken(identity);
+
+    // fill in the token information
+    authUser = authUser with
+    {
+      Token = new AuthToken
       {
-        new Claim(ClaimTypes.Name, account.UserName),
-        new Claim(ClaimTypes.Role, account.Role)
-      };
-
-    var tokenHandler = new JwtSecurityTokenHandler();
-    var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
-    var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
-    {
-      Subject = new ClaimsIdentity(claims),
-      Expires = expiresUtcTime,
-      Issuer = _config["JwtSettings:Issuer"],
-      Audience = _config["JwtSettings:Audience"],
-      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-    });
-
-    string jwtToken = tokenHandler.WriteToken(token);
-
-    /* Returning the User Session object */
-    var userSession = new UserSession
-    {
-      UserName = account.UserName,
-      Role = account.Role,
-      Token = jwtToken,
-      ExpiresUtcTime = expiresUtcTime
+        Token = jwtToken,
+        ExpiresUtcTime = expiresUtcTime
+      }
     };
-    return userSession;
+
+    return authUser;
   }
 
-  public UserSession? RefreshJwtToken(string token)
+  public AuthToken? RefreshJwtToken(string token)
   {
     var claimsUser = GetPrincipalFromToken(token);
     if (claimsUser == null)
@@ -68,39 +56,45 @@ class JwtAuthenticationManager
     // 再檢查一次過期時限...未實作
 
     //## 產生 token
-    ClaimsIdentity? claimsIdentity = claimsUser.Identity as ClaimsIdentity;
-    if (claimsIdentity == null)
+    ClaimsIdentity? identity = claimsUser.Identity as ClaimsIdentity;
+    if (identity == null)
       return null;
 
-    /* Re-generating JWT Token */
-    var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
+    (string jwtToken, DateTime expiresUtcTime) = DoMakeToken(identity);
+
+    var newToken = new AuthToken
+    {
+      Token = jwtToken,
+      ExpiresUtcTime = expiresUtcTime
+    };
+
+    return newToken;
+  }
+
+  (string jwtToken, DateTime expiresUtcTime) DoMakeToken(ClaimsIdentity identity)
+  {
     var key = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
+    var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
 
     var tokenHandler = new JwtSecurityTokenHandler();
-    var newToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
+    var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
     {
-      Subject = claimsIdentity,
+      Subject = identity,
       Expires = expiresUtcTime,
       Issuer = _config["JwtSettings:Issuer"],
       Audience = _config["JwtSettings:Audience"],
       SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
     });
 
-    string newJwtToken = tokenHandler.WriteToken(newToken);
+    string jwtToken = tokenHandler.WriteToken(token);
 
-    /* Returning the User Session object */
-    var userSession = new UserSession
-    {
-      UserName = claimsIdentity.Name!,
-      Role = claimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value!,
-      Token = newJwtToken,
-      ExpiresUtcTime = expiresUtcTime
-    };
-
-    return userSession;
+    return (jwtToken, expiresUtcTime);
   }
 
-  private ClaimsPrincipal? GetPrincipalFromToken(string token)
+  /// <summary>
+  /// helper
+  /// </summary>
+  ClaimsPrincipal? GetPrincipalFromToken(string token)
   {
     try
     {
@@ -117,7 +111,10 @@ class JwtAuthenticationManager
     }
   }
 
-  private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
+  /// <summary>
+  /// helper
+  /// </summary>
+  bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
   {
     return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
       jwtSecurityToken.Header.Alg.Equals(value: SecurityAlgorithms.HmacSha256,

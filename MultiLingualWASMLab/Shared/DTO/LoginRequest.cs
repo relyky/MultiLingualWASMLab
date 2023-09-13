@@ -10,8 +10,8 @@ namespace MultiLingualWASMLab.DTO;
 
 public class LoginRequest
 {
-  public string UserName { get; set; } = default!;
-  public string Mima { get; set; } = default!;
+  public string UserId { get; set; } = string.Empty;
+  public string Mima { get; set; } = string.Empty;
 }
 
 public class LoginRequestValidator : AbstractValidator<LoginRequest>
@@ -22,7 +22,7 @@ public class LoginRequestValidator : AbstractValidator<LoginRequest>
     //bool zhTW = culture.Name == "zh-TW";
     //bool enUS = culture.Name == "en-US";
 
-    RuleFor(m => m.UserName)
+    RuleFor(m => m.UserId)
       .NotEmpty();
 
     RuleFor(m => m.Mima)

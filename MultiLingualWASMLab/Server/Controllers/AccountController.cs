@@ -26,30 +26,36 @@ public class AccountController : ControllerBase
 
   [HttpPost("[action]")]
   [AllowAnonymous]
-  public ActionResult<UserSession> Login([FromBody] LoginRequest request)
+  public ActionResult<AuthUser> Login([FromBody] LoginRequest request)
   {
     //## Validating the User Credentials
-    if (String.IsNullOrWhiteSpace(request.UserName) || String.IsNullOrWhiteSpace(request.Mima))
+    if (String.IsNullOrWhiteSpace(request.UserId) || String.IsNullOrWhiteSpace(request.Mima))
       return Unauthorized();
 
     // ---- 認證登入者
-    UserAccount? userAccount = _userAccountService.GetUserAccount(request.UserName);
-    if (userAccount == null || userAccount.Mima != request.Mima)
+    UserAccount? account = _userAccountService.GetUserAccount(request.UserId);
+    if (account == null || account.Mima != request.Mima)
       return Unauthorized();
 
     //※ 已通過帳密檢查
+    AuthUser authUser = new AuthUser
+    {
+      UserId = account.UserId,
+      UserName = account.UserName,
+      Roles = new string[] { account.Role },
+    };
 
     var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService, _config, _tokenValidationParameters);
-    var userSession = jwtAuthenticationManager.GenerateJwtToken(userAccount);
-    if (userSession is null)
+    authUser = jwtAuthenticationManager.GenerateJwtToken(authUser);
+    if (authUser is null)
       return Unauthorized();
 
-    return userSession;
+    return authUser;
   }
 
   [HttpPost("[action]")]
   [Authorize]
-  public ActionResult<UserSession> RefreshToken([FromHeader] string authorization)
+  public ActionResult<AuthToken> RefreshToken([FromHeader] string authorization)
   {
     string? token = null;
     if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))

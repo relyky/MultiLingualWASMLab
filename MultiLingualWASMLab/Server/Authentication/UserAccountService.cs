@@ -8,14 +8,14 @@ public class UserAccountService
   {
     _userAccountList = new List<UserAccount>()
     {
-      new() { UserName = "admin", Mima = "admin", Role = "Admin"},
-      new() { UserName = "user", Mima = "user", Role = "User"},
+      new() { UserId = "admin", UserName = "系統管理員", Mima = "admin", Role = "Admin"},
+      new() { UserId = "user" , UserName = "使用者"    , Mima = "user" , Role = "User"},
     };
   }
 
-  internal UserAccount? GetUserAccount(string userName)
+  internal UserAccount? GetUserAccount(string userId)
   {
     System.Threading.SpinWait.SpinUntil(() => false, 1000); // 模擬 DB 取存花了１秒。
-    return _userAccountList.FirstOrDefault(c => c.UserName.Equals(userName));
+    return _userAccountList.FirstOrDefault(c => c.UserId.Equals(userId));
   }
 }

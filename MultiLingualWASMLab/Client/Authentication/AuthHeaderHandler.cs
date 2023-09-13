@@ -30,9 +30,14 @@ class AuthHeaderHandler : DelegatingHandler
     //※ potentially refresh token here if it has expired etc.
     if(true /* token 快過期了 */)
     {
-      UserSession? newUserSession = await RefreshTokenAsync(token);
-      if (newUserSession != null)
-        token = newUserSession.Token;
+      AuthToken? newToken = await RefreshTokenAsync(token);
+      if (newToken != null)
+      {
+        //# 更新登入狀態
+        await authProvider.UpdateTokenAsync(newToken);
+        //# 更新 bearer token
+        token = newToken.Token;
+      }
     }
 
     //## GO
@@ -43,7 +48,7 @@ class AuthHeaderHandler : DelegatingHandler
     return resp;
   }
 
-  protected async Task<UserSession?> RefreshTokenAsync(string token)
+  protected async Task<AuthToken?> RefreshTokenAsync(string token)
   {
     try
     {
@@ -56,10 +61,8 @@ class AuthHeaderHandler : DelegatingHandler
 
       if (resp.IsSuccessStatusCode)
       {
-        var userSession = await resp.Content.ReadFromJsonAsync<UserSession>();
-        //# 更新登入狀態
-        await authProvider.UpdateAuthenticationStateAsync(userSession);
-        return userSession;
+        var newToken = await resp.Content.ReadFromJsonAsync<AuthToken>();
+        return newToken;
       }
 
       //# for DEBUG

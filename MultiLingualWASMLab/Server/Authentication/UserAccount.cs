@@ -2,7 +2,8 @@
 
 class UserAccount
 {
-  public string UserName { get; set; } = default!;
-  public string Mima { get; set; } = default!;
-  public string Role { get;set; } = default!;
+  public string UserId { get; set; } = string.Empty;
+  public string UserName { get; set; } = string.Empty;
+  public string Mima { get; set; } = string.Empty;
+  public string Role { get;set; } = string.Empty;
 }

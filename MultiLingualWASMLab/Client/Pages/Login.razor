@@ -15,8 +15,8 @@
 
         <MudText Typo=Typo.h3>Login</MudText>
         <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@formValidator.Validation ValidationDelay=0>
-          <MudTextField @bind-Value=@formData.UserName
-                        For="()=> formData.UserName"
+          <MudTextField @bind-Value=@formData.UserId
+                        For="()=> formData.UserId"
                         Immediate=false
                         Label="User Name" />
 
@@ -57,10 +57,10 @@
       var resp = await http.PostAsJsonAsync("/api/Account/Login", formData);
       if (resp.IsSuccessStatusCode)
       {
-        var userSession = await resp.Content.ReadFromJsonAsync<UserSession>();
+        var authUser = await resp.Content.ReadFromJsonAsync<AuthUser>();
         // 更新登入狀態
         var authProvider = (CustomAuthenticationStateProvider)authBase;
-        await authProvider.UpdateAuthenticationStateAsync(userSession);
+        await authProvider.UpdateAuthenticationStateAsync(authUser);
         // 登入成功後轉址，並強制刷新畫面。
         navSvc.NavigateTo("/", true);
       }
