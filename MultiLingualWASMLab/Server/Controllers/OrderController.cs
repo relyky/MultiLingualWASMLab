@@ -27,4 +27,12 @@ public class OrderController : ControllerBase
     return Ok(formData);
   }
 
+  [HttpPost("[action]/{id}")]
+  public async Task<ActionResult<OrderModel?>> GetOrder(string id)
+  {
+    await Task.CompletedTask;
+    OrderModel? result = null; // 測試能否送回 null 。
+    return Ok(result);
+  }
+
 }

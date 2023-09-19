@@ -11,6 +11,8 @@
 <MudContainer>
   <MudText Typo=Typo.h3>@loc["Simple Form"]</MudText>
 
+  <MudButton Variant=Variant.Filled Color=Color.Primary Class="ml-auto" OnClick=HandleGetOrder>@loc["Get Order"]</MudButton>
+
   <MudCard>
     <MudForm Model=@formData @ref=@refForm @bind-IsValid=@f_isValid Validation=@orderValidator.Validation ValidationDelay=0>
       <MudCardContent>
@@ -97,8 +99,32 @@
       await refForm.Validate();
       if (!refForm.IsValid) return;
 
-      formData = await bizApi.SaveOrder(formData);
+      formData = await bizApi.SaveOrderAsync(formData);
       snackSvc.Add("Submited!", MudBlazor.Severity.Success);
+    }
+    catch (Refit.ApiException ex)
+    {
+      dlgSvc.ShowMessageBox("錯誤訊息", ex.Content).AndForget();
+    }
+    catch (Exception ex)
+    {
+      string errMsg = "EXCEPTION: " + ex.Message;
+      dlgSvc.ShowMessageBox("出現例外！", errMsg).AndForget();
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+
+  async Task HandleGetOrder()
+  {
+    try
+    {
+      f_loading = true;
+
+      var IamNil = await bizApi.GetOrderAsync("這是訂單號碼");
+      snackSvc.Add($"IamNil is null:{IamNil is null}", MudBlazor.Severity.Success);
     }
     catch (Refit.ApiException ex)
     {

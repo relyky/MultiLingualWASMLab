@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using MultiLingualWASMLab.Server.Authentication;
@@ -23,7 +24,13 @@ try
   builder.Host.UseSerilog();
 
   #region //§§ Add services to the container. -------------------------------------------
-  builder.Services.AddControllersWithViews();
+  builder.Services.AddControllersWithViews(opt => {
+    //## 禁止自動把 HTTP Response 為 null 時轉換成 204 NoContent。因為 System.Text.Json 無法對 204 NoContent 解序列化！
+    // 此設定應該只適用於 Web API。
+    // remove formatter that turns nulls into 204 - No Content responses
+    opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
+  });
+
   builder.Services.AddRazorPages();
 
   //## for Authentication & Authorization
