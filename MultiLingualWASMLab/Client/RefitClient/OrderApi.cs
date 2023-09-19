@@ -5,6 +5,6 @@ namespace MultiLingualWASMLab.Client.RefitClient;
 
 public interface IOrderApi
 {
-  [Post("/api/Order")]
+  [Post("/api/Order/SaveOrder")]
   Task<OrderModel> SaveOrder(OrderModel formData);
 }
