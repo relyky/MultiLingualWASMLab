@@ -9,22 +9,22 @@
 <MudContainer>
   <MudText Typo=Typo.h1 Align=Align.Center>@loc["Index Page"]</MudText>
 
-  <MudText Typo=Typo.h4>登入狀態：AuthorizeView</MudText>
-  <AuthorizeView Context="auth">
-    <Authorized>
-      <MudText>Hello, @auth.User.Identity?.Name</MudText>
-      <MudText>
-        Roles: @(String.Join(",", auth.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))
-      </MudText>
-    </Authorized>
-    <NotAuthorized>
-      <h1>Hello, Guest</h1>
-    </NotAuthorized>
-  </AuthorizeView>
+    <MudText Typo=Typo.h4>登入狀態：AuthorizeView</MudText>
+    <AuthorizeView Context="auth">
+      <Authorized>
+        <MudText>Hello, @auth.User.Identity?.Name</MudText>
+        <MudText>
+          Roles: @(String.Join(",", auth.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))
+        </MudText>
+      </Authorized>
+      <NotAuthorized>
+        <h1>Hello, Guest</h1>
+      </NotAuthorized>
+    </AuthorizeView>
 
-  <MudText Typo=Typo.h4>登入狀態：AuthorizeState GO</MudText>
-  <pre>
-    @Utils.JsonSerialize(authUser, true, true)
+    <MudText Typo=Typo.h4>登入狀態：AuthorizeState</MudText>
+    <pre style="overflow-wrap:anywhere; white-space:pre-wrap;">
+      @Utils.JsonSerialize(authUser, true, true)
   </pre>
 
 </MudContainer>

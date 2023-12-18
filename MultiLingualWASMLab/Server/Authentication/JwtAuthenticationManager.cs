@@ -73,7 +73,8 @@ class JwtAuthenticationManager
 
   (string jwtToken, DateTime expiresUtcTime) DoMakeToken(ClaimsIdentity identity)
   {
-    var key = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
+    var signingKey = Encoding.ASCII.GetBytes(_config["JwtSettings:SigningKey"]!);
+    var secretKey = Encoding.ASCII.GetBytes(_config["JwtSettings:SecretKey"]!);
     var expiresUtcTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_config.GetValue<double>("JwtSettings:TokenLifetimeMinutes")));
 
     var tokenHandler = new JwtSecurityTokenHandler();
@@ -83,7 +84,8 @@ class JwtAuthenticationManager
       Expires = expiresUtcTime,
       Issuer = _config["JwtSettings:Issuer"],
       Audience = _config["JwtSettings:Audience"],
-      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(signingKey), SecurityAlgorithms.HmacSha256Signature),
+      EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512) // JWE
     });
 
     string jwtToken = tokenHandler.WriteToken(token);

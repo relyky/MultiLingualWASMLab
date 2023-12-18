@@ -38,6 +38,7 @@ try
   {
     ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SigningKey"])),
+    TokenDecryptionKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SecretKey"])), // JWE
     ValidateIssuer = true,
     ValidateAudience = true,
     ValidateLifetime = true,
