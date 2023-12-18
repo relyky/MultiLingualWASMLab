@@ -117,25 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Counter" xml:space="preserve">
-    <value>計數器</value>
-  </data>
-  <data name="Fetch data" xml:space="preserve">
-    <value>取得數據</value>
-  </data>
-  <data name="Home" xml:space="preserve">
-    <value>首頁</value>
-  </data>
-  <data name="Login" xml:space="preserve">
-    <value>登入</value>
-  </data>
-  <data name="Logout" xml:space="preserve">
-    <value>登出</value>
-  </data>
   <data name="My Chat Room" xml:space="preserve">
     <value>我的聊天室</value>
-  </data>
-  <data name="Simple Form" xml:space="preserve">
-    <value>簡單表單</value>
   </data>
 </root>
