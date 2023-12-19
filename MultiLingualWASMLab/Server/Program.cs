@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using MultiLingualWASMLab.Server.Authentication;
+using MultiLingualWASMLab.Models;
 using Serilog;
 using Serilog.Events;
 using System.Text;
@@ -67,6 +68,15 @@ try
   builder.Services.AddSingleton<UserAccountService>();
   builder.Services.AddSingleton(tokenValidationParameters);
 
+  //## for °·±dª¬ºAÀË¬d
+  builder.Services.AddHealthChecks()
+         .AddSqlServer(new HealthChecks.SqlServer.SqlServerHealthCheckOptions
+         {
+            ConnectionString = "Unknow",
+            CommandText = "SELECT 1;"
+         })
+         .AddCheck<SimpleHealthCheck>(nameof(SimpleHealthCheck));
+
   #endregion
 
   var app = builder.Build();
@@ -114,6 +124,12 @@ try
   //## for Authentication & Authorization
   app.UseAuthentication();
   app.UseAuthorization();
+
+  //## for °·±dª¬ºAÀË¬d
+  app.MapHealthChecks("/healthz", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+  {
+    ResponseWriter = SimpleHealthCheck.WriteHealthCheckUIResponse
+  });
 
   #endregion
 
