@@ -132,9 +132,6 @@
   <data name="Logout" xml:space="preserve">
     <value>登出</value>
   </data>
-  <data name="My Chat Room" xml:space="preserve">
-    <value>我的聊天室</value>
-  </data>
   <data name="Simple Form" xml:space="preserve">
     <value>簡單表單</value>
   </data>
